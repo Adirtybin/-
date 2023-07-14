@@ -344,9 +344,6 @@ public class Robot extends TimedRobot {
     }else{
       setvelo = targetvelo;
     }
-  
-    // SmartDashboard.putNumber("TargetShooterSpeed", setvelo);
-    // TargetShooterSpeed.setDouble(setvelo);
     return setvelo;
   }
 
@@ -382,9 +379,7 @@ public class Robot extends TimedRobot {
 
     double kp_spin = 0.017;
     double ki_spin = 0.00000;
-    SmartDashboard.putNumber("HAST", error_spin);
     var result = frontcam.getLatestResult();
-    SmartDashboard.putBoolean("HASSSS",result.hasTargets());
     if(result.hasTargets()){
       error_spin = result.getBestTarget().getYaw();
       cam_pitch_degree = result.getBestTarget().getPitch();
@@ -414,10 +409,11 @@ public class Robot extends TimedRobot {
       spin_input = -0.2;
     }
   }
-
+  /**
+   * NOT USE METHOD
+   */
   public Boolean auto_detect(){
     Boolean autoshoot = false;
-    
     if((degtoenc(tarpitch)-encoder_pitch.getPosition())<3){
       if(Math.abs(-targetVelocity_UnitsPer100ms) >= Math.abs(-_talon.getSelectedSensorVelocity())){
         autoshoot = true;
@@ -526,7 +522,7 @@ public class Robot extends TimedRobot {
     GyroYaw.setDouble(gyro.getYaw());
     CurrentShooterSpeed_unitPer100ms.setDouble(current_velocity);
     TargetShooterSpeed.setDouble(setvelo);
-    SmartDashboard.putNumber("intakeMotorTemp", ball_collector.getOutputCurrent());
+    SmartDashboard.putNumber("intakeMotorCurrent", ball_collector.getOutputCurrent());
  }
 
   /**
@@ -547,7 +543,6 @@ public class Robot extends TimedRobot {
   @Override
   public void autonomousInit() {
     // schedule the autonomous command (example)
-    
     if (m_autonomousCommand != null) {
       m_autonomousCommand.schedule();
     }
@@ -615,10 +610,7 @@ public class Robot extends TimedRobot {
     _talon.set(TalonFXControlMode.PercentOutput, 0);
     ball_collector.set(0); 
 
-
-
-    //This is shit
-/************************************************* */
+/**************This is shit******************** */
     mTimer.reset();
     mTimer.start();
     STEP = 1;
@@ -655,7 +647,7 @@ public class Robot extends TimedRobot {
           break;
     }
   }
-
+  
   @Override
   public void teleopInit() {
     if (m_autonomousCommand != null) {
@@ -719,21 +711,12 @@ public class Robot extends TimedRobot {
       
     }
 
-    SmartDashboard.putString("color1",ball_1);
-    SmartDashboard.putNumber("xspeed", get_x_speed(spinenctodeg(encoder_spin.getPosition()), get_drive_speed()));
-    SmartDashboard.putNumber("yspeed", get_y_speed(spinenctodeg(encoder_spin.getPosition()), get_drive_speed()));
-    SmartDashboard.putNumber("LeftMotor1Temp", drive_left_1.getMotorTemperature());
-    SmartDashboard.putNumber("LeftMotor2Temp", drive_left_2.getMotorTemperature());
-    SmartDashboard.putBoolean("ats", auto_detect());
-    
     double straight_velo = xbox.getRawAxis(1)*0.8;
     double turn_velo = -xbox.getRawAxis(4)*0.8;
     m_driver.arcadeDrive(straight_velo, turn_velo);
 
     motor_spin.set(spin_check(spin_input, encoder_spin.getPosition()));
-    SmartDashboard.putNumber("SpinTurned", spin_check(spin_input, encoder_spin.getPosition()));
-    SmartDashboard.putNumber("rorrspin", error_spin);
-    
+
     if(xbox.getRawButton(2)){
       m_pneumatic.intakeUp();
     }if(xbox.getRawButton(3)){
@@ -768,7 +751,6 @@ public class Robot extends TimedRobot {
 
     if(xbox.getRawAxis(3)>=0.1){ 
       ball_collector.set(xbox.getRawAxis(3));
-      SmartDashboard.putNumber("collectorMotorPower", xbox.getRawAxis(3));
     }else if(xbox.getRawAxis(2)>=0.1){
       ball_collector.set(-xbox.getRawAxis(2));
     }else{
@@ -865,9 +847,7 @@ public class Robot extends TimedRobot {
   public void auto_shoot2(){
     double kp_spin = 0.017;
     double ki_spin = 0.00000;
-    SmartDashboard.putNumber("HAST", error_spin);
     var result = frontcam.getLatestResult();
-    SmartDashboard.putBoolean("HASSSS",result.hasTargets());
     if(result.hasTargets()){
       error_spin = result.getBestTarget().getYaw();
       cam_pitch_degree = result.getBestTarget().getPitch();
@@ -930,7 +910,6 @@ public class Robot extends TimedRobot {
 
   public void  auto_shooter(){
     var result = frontcam.getLatestResult();
-    SmartDashboard.putBoolean("HASSSS",result.hasTargets());
     if(result.hasTargets()){
       error_spin = result.getBestTarget().getYaw();
       cam_pitch_degree = result.getBestTarget().getPitch();
@@ -939,7 +918,6 @@ public class Robot extends TimedRobot {
       PitchAngle_Degree.setDouble(spinenctodeg(encoder_pitch.getPosition()));
       double vertedcon_velo = cal_velo(distance, target_height_m, camera_height_m)*100/Math.PI/10.16/1.5/10*2048;
       launcher_set(vertedcon_velo);
-      SmartDashboard.putNumber("SHOOTER_V", vertedcon_velo);
     }else{
       launcher_set(2000);
     }
@@ -975,6 +953,6 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void testPeriodic() {
-    
+
   }
 }
