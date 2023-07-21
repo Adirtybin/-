@@ -22,8 +22,6 @@ import com.revrobotics.CANSparkMax.IdleMode;
 
 import java.lang.Math;
 
-import javax.lang.model.util.ElementScanner6;
-
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj.AddressableLEDBuffer;
@@ -43,15 +41,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonUtils;
 
-/**
- * The VM is configured to automatically run this class, and to call the
- * functions corresponding to
- * each mode, as described in the TimedRobot documentation. If you change the
- * name of this class or
- * the package after creating this project, you must also update the
- * build.gradle file in the
- * project.
- */
 public class Robot extends TimedRobot {
   ShuffleboardTab NewTab = Shuffleboard.getTab("NewTab");
   private NetworkTableEntry GyroYaw = NewTab.add("GyroYaw", 0).getEntry();
@@ -437,7 +426,6 @@ public class Robot extends TimedRobot {
 
   public double get_drive_speed() {
     double speed_d = encoder_leftdrive.getVelocity() / 10.71 * 0.152 * Math.PI / 60;
-
     return speed_d;
   }
 
@@ -445,7 +433,9 @@ public class Robot extends TimedRobot {
     drive_left_1.set(auto_drivestraight(-enc, -meters));
     drive_right_2.set(auto_drivestraight(-enc, -meters));
   }
-
+  /**
+   * NOT USE METHOD
+   */
   public void auto_shoot() {
     motor_spin.set(spin_check(spin_input));
     double kp_spin = 0.017;
@@ -538,7 +528,6 @@ public class Robot extends TimedRobot {
     } else {
       motor_spin.set(-0.5);
     }
-
   }
 
   public void auto_pitch() {
@@ -634,49 +623,19 @@ public class Robot extends TimedRobot {
     _talon.config_kI(Constants.kPIDLoopIdx, Constants.kGains_Velocit.kI, Constants.kTimeoutMs);
     _talon.config_kD(Constants.kPIDLoopIdx, Constants.kGains_Velocit.kD, Constants.kTimeoutMs);
 
-    /*
-     * Talon FX does not need sensor phase set for its integrated sensor
-     * This is because it will always be correct if the selected feedback device is
-     * integrated sensor (default value)
-     * and the user calls getSelectedSensor* to get the sensor's position/velocity.
-     * 
-     * https://phoenix-documentation.readthedocs.io/en/latest/ch14_MCSensor.html#
-     * sensor-phase
-     */
-    // _talon.setSensorPhase(true);
-    // _talon2.follow(_talon);
-    // Instantiate our RobotContainer. This will perform all our button bindings,
-    // and put our
-    // autonomous chooser on the dashboard.
     m_led = new AddressableLED(0);
-    m_ledBuffer = new AddressableLEDBuffer(13);
-    // Reuse buffer
-    // Default to a length of 60, start empty output
-    // Length is expensive to set, so only set it once, then just update data
+    m_ledBuffer = new AddressableLEDBuffer(26);
     m_led.setLength(m_ledBuffer.getLength());
-
-    // Set the data
     m_led.setData(m_ledBuffer);
-
     m_led.start();
-
     for (int i = 0; i < m_ledBuffer.getLength(); i++) {
       m_ledBuffer.setRGB(1, 255, 0, 0);
     }
-    m_led.setData(m_ledBuffer);
-    
+    m_led.setData(m_ledBuffer);  
   }
 
   @Override
   public void robotPeriodic() {
-    // Runs the Scheduler. This is responsible for polling buttons, adding
-    // newly-scheduled
-    // commands, running already-scheduled commands, removing finished or
-    // interrupted commands,
-    // and running subsystem periodic() methods. This must be called from the
-    // robot's periodic
-    // block in order for anything in the Command-based framework to work.
-
     LeftWheel.setDouble(encoder_leftdrive.getPosition());
     RightWheel.setDouble(encoder_rightdrive.getPosition());
     LimitPitch.setBoolean(limitsw.get());
@@ -690,22 +649,15 @@ public class Robot extends TimedRobot {
     SmartDashboard.putBoolean("limitSwPitch", limitsw.get());
     SmartDashboard.putBoolean("MotorLimitPitch", motorPitchLimitSwitch.isPressed());
     SmartDashboard.putBoolean("limitSw2Spin", limitsw2.get());
-
     SmartDashboard.putNumber("SpinPosition", encoder_spin.getPosition());
     SmartDashboard.putNumber("PitchPosition", encoder_pitch.getPosition());
   }
 
-  /**
-   * This autonomous runs the autonomous command selected by your
-   * {@link RobotContainer} class.
-   */
   @Override
   public void autonomousInit() {
-    // schedule the autonomous command (example)
     if (m_autonomousCommand != null) {
       m_autonomousCommand.schedule();
     }
-
     _talon.set(TalonFXControlMode.PercentOutput, 0);
     mTimer.reset();
     while (mTimer.get() < 2) {
@@ -878,9 +830,6 @@ public class Robot extends TimedRobot {
     m_pneumatic.intakeUp();
   }
 
-  /**
-   * This function is called periodically during operator control.
-   */
   @Override
   public void teleopPeriodic() {
     if (!limitsw.get() | motorPitchLimitSwitch.isPressed()) {
@@ -904,7 +853,6 @@ public class Robot extends TimedRobot {
     }
     if (!ball_detector.get()) {
       ball_1 = ball_2;
-
     }
 
     double straight_velo = xbox.getRawAxis(1) * 0.8;
@@ -948,9 +896,6 @@ public class Robot extends TimedRobot {
     if (xbox.getRawAxis(3) >= 0.1) {
       ball_collector.set(xbox.getRawAxis(3));
     }
-    // else if (xbox.getRawAxis(2) >= 0.1) {
-    // ball_collector.set(-xbox.getRawAxis(2));
-    // }
     else {
       ball_collector.set(0);
       m_pneumatic.intakeUp();
@@ -1031,17 +976,8 @@ public class Robot extends TimedRobot {
     PitchInit();
     SpinInit();
   }
-  /**
-   * This function is called periodically during test mode.
-   */
+
   @Override
   public void testPeriodic() {
-    if (_joy.getPOV() == 180) {
-      motor_pitch.set(0.2);
-    } else if (_joy.getPOV() == 0) {
-      motor_pitch.set(-0.2);
-    } else {
-      motor_pitch.set(0);
-    }
   }
 }
